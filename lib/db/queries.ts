@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "./index";
 import {
   legoSets,
@@ -15,6 +15,19 @@ export async function getSetByCode(code: string) {
     .from(legoSets)
     .where(eq(legoSets.setCode, code));
   return set ?? null;
+}
+
+export async function searchSets(query: string, limit = 20) {
+  const q = query.trim();
+  if (!q) return [];
+  return db
+    .select()
+    .from(legoSets)
+    .where(
+      or(ilike(legoSets.setName, `%${q}%`), ilike(legoSets.setCode, `${q}%`)),
+    )
+    .orderBy(desc(legoSets.year))
+    .limit(limit);
 }
 
 export async function upsertSet(input: NewLegoSet) {
