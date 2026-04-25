@@ -53,34 +53,37 @@ Esto evita duplicar nombre/tema/año cada vez que añado una copia, permite bús
 
 ---
 
-## 3. Integración Rebrickable
+## 3. Integración con Rebrickable
 
-[Rebrickable API](https://rebrickable.com/api/) es gratis con API key. Tiene **dos usos** que cubren todo lo que necesitamos sin scraping:
+[Rebrickable](https://rebrickable.com) ofrece dos formas de obtener sus datos. Combinamos ambas: **dumps como fuente primaria, API como fallback**.
 
-### 3.1. Lookup por código
+### 3.1. Dumps semanales (fuente primaria)
 
-`GET /lego/sets/{set_num}/` → devuelve todos los datos del set. Se usa cuando ya tienes el código en la mano: lo metes en el form, autorrellenamos `lego_sets` y ya tienes nombre/tema/año/piezas/portada sin teclear nada.
+[`https://rebrickable.com/downloads/`](https://rebrickable.com/downloads/) publica CSV gzipped actualizados semanalmente. Para fase 1 solo descargamos dos:
 
-### 3.2. Búsqueda rápida (typeahead) — para llenado rápido
+- **`sets.csv.gz`** (~25k filas, pocos MB): `set_num`, `name`, `year`, `theme_id`, `num_parts`, `img_url`.
+- **`themes.csv.gz`** (~cientos de filas): `id`, `parent_id`, `name`. La usamos en el import para resolver `theme_id` al nombre del tema y guardarlo desnormalizado en `lego_sets`.
 
-`GET /lego/sets/?search=galaxy+explorer` → devuelve sets que coincidan parcialmente. Esto habilita un campo "busca un set" que ofrece sugerencias mientras escribes. Útil cuando **no recuerdas el código** pero sí el nombre, o solo una parte.
+**Flujo**:
+1. **Bootstrap**: en el primer setup, un script descarga los CSV, parsea y popula `lego_sets`.
+2. **Refresh**: a mano mediante un endpoint admin oculto (`POST /api/admin/sync-rebrickable`) cuando quieras tener sets nuevos. Cron semanal queda para fase 2.
 
-Flujo: tecleas "galax" → dropdown con "10497 Galaxy Explorer (Icons, 2022)" / "928 Galaxy Explorer (Space, 1979)" → eliges → todo autorrellenado.
+**Ventajas sobre llamar a la API en cada búsqueda**:
+- Typeahead instantáneo (SQL local, sin latencia de red).
+- App no depende de Rebrickable estando arriba en runtime.
+- Sin gestión de rate limits.
 
-### 3.3. Por qué no scraping
+### 3.2. API REST (fallback)
 
-- Los TOS de Rebrickable lo prohíben cuando hay API disponible.
-- LEGO.com es frágil (cambian HTML, anti-bot) y los TOS también lo restringen.
-- BrickLink y Brickset tienen API oficial — sirven como fallback si algún set rarísimo falta en Rebrickable.
+La API key vive como `REBRICKABLE_API_KEY` en variables de entorno **server-side** (Route Handler / Server Action). **Nunca en el cliente**. Se usa solo en casos puntuales:
 
-Conclusión: API oficial para todo. Scraping no aporta nada y trae fragilidad y riesgo legal.
+- Set raro no presente en el dump (poco probable, ~25k cubre prácticamente todo).
+- Forzar refresh de un set concreto sin re-importar todo.
+- Features futuras: price guide, minifigs, instrucciones de montaje.
 
-### 3.4. Arquitectura (importante por móvil + Vercel)
+### 3.3. Sin scraping
 
-- La API key de Rebrickable vive en variables de entorno del servidor (Route Handler / Server Action de Next.js). **Nunca en el cliente**.
-- **Cache en Postgres**: la primera vez que tocamos un set lo guardamos en `lego_sets`. La segunda vez (otra copia del mismo set, otra búsqueda) servimos desde Postgres → instantáneo.
-- Búsquedas rápidas: primero contra Postgres (`ILIKE` sobre `set_name`); si no hay resultados o son pocos, caemos a Rebrickable y cacheamos lo nuevo.
-- Refresh manual disponible (botón "actualizar datos del catálogo") por si Rebrickable corrige algo — no automático.
+Los TOS de Rebrickable lo prohíben cuando hay alternativas oficiales. Con dumps + API ya está cubierto todo. LEGO.com es frágil (HTML cambiante, anti-bot) y tampoco aporta.
 
 ---
 
@@ -103,7 +106,7 @@ Propongo **una sola vista principal** + **un formulario de alta**. Nada más en 
 ### 4.2. Formulario de alta
 
 - Botón "Añadir copia" siempre visible.
-- **Campo combinado**: typeahead que busca tanto por código como por nombre (usa Rebrickable + cache local). Eliges una sugerencia → autorrelleno de `lego_sets`.
+- **Campo combinado**: typeahead que busca tanto por código como por nombre directamente sobre `lego_sets` local (instantáneo). Eliges una sugerencia → autorrelleno.
 - El resto a mano: estado de caja, completo/incompleto, descatalogado, precio, fecha, notas.
 - Botón "**Guardar y añadir otra**" para meter en lote varios sets — clave para fase 1.
 

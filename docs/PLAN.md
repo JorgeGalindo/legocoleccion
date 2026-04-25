@@ -38,16 +38,20 @@
 
 ---
 
-## Sprint 2 — Cliente Rebrickable
+## Sprint 2 — Bootstrap del catálogo desde Rebrickable dumps
 
-**Objetivo**: poder buscar y traer datos de Rebrickable desde el server.
+**Objetivo**: tener `lego_sets` poblado con todos los sets oficiales (~25k) listos para typeahead instantáneo, sin depender de la API en runtime.
 
-- [ ] `lib/rebrickable.ts`: wrapper de `fetch` con la API key (server-only).
-- [ ] `getOrFetchSet(setCode)`: primero busca en `lego_sets`; si no, llama a Rebrickable, hace upsert, devuelve.
-- [ ] `searchSets(query)`: primero `ILIKE` sobre `lego_sets`; si pocos resultados, llama a `?search=` de Rebrickable y cachea los nuevos.
-- [ ] Server Action `searchSetsAction(query)` para que el cliente la consuma.
+- [ ] `scripts/sync-rebrickable-dumps.ts`:
+  - Descarga `sets.csv.gz` y `themes.csv.gz` de https://rebrickable.com/downloads/.
+  - Descomprime y parsea (CSV streaming para no cargar todo en memoria).
+  - Resuelve `theme_id` → nombre del tema (lookup contra `themes.csv`).
+  - `INSERT ... ON CONFLICT (set_code) DO UPDATE` sobre `lego_sets`.
+- [ ] Endpoint admin oculto `POST /api/admin/sync-rebrickable` que ejecuta el script. Sin UI por ahora — se invoca con curl/Postman.
+- [ ] Función `searchSets(query)`: `ILIKE` sobre `set_name` + prefix match sobre `set_code`. Solo SQL local, sin red.
+- [ ] (Opcional, aplazable a sprint posterior) Wrapper API REST como fallback: `lib/rebrickable-api.ts` con `getSetByCodeFromAPI` para cuando un set no esté en el dump.
 
-**DoD**: en `/debug`, un input que llama a `searchSetsAction` y muestra resultados. Verificable en producción.
+**DoD**: tras invocar `/api/admin/sync-rebrickable`, `lego_sets` tiene ~25k filas. En `/debug`, un input typeahead que llama a `searchSets("galax")` muestra resultados al instante.
 
 ---
 
