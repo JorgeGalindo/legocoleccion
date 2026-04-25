@@ -44,6 +44,12 @@ export default function RootLayout({
                 Colección
               </a>
               <a
+                href="/add"
+                className="rounded bg-lego-yellow px-3 py-1.5 text-surface hover:opacity-90"
+              >
+                + Añadir
+              </a>
+              <a
                 href="/debug"
                 className="rounded border border-line px-3 py-1.5 text-fg-muted transition-colors hover:border-lego-yellow hover:text-fg"
               >
