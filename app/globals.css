@@ -1,26 +1,25 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  --color-lego-red: #d01012;
+  --color-lego-yellow: #f2cd37;
+  --color-lego-blue: #0055bf;
+  --color-lego-green: #237841;
+  --color-lego-stone: #a0a5a9;
+  --color-lego-black: #1b2a34;
+  --color-lego-cream: #f4efe6;
+  --color-lego-cream-dark: #e8dfd0;
+
+  --color-background: var(--color-lego-cream);
+  --color-foreground: var(--color-lego-black);
+
+  --font-sans: var(--font-inter);
+  --font-display: var(--font-bungee);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
+html,
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-lego-cream);
+  color: var(--color-lego-black);
+  color-scheme: light;
 }
