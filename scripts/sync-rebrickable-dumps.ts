@@ -25,9 +25,7 @@ interface RawSet {
   img_url: string;
 }
 
-async function fetchGzCsv<T extends Record<string, string>>(
-  url: string,
-): Promise<T[]> {
+async function fetchGzCsv<T>(url: string): Promise<T[]> {
   const res = await fetch(url);
   if (!res.ok) throw new Error(`${url} → HTTP ${res.status}`);
   const buf = Buffer.from(await res.arrayBuffer());
