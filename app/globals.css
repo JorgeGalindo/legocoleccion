@@ -1,17 +1,25 @@
 @import "tailwindcss";
 
 @theme {
+  /* Brick accents */
   --color-lego-red: #d01012;
   --color-lego-yellow: #f2cd37;
   --color-lego-blue: #0055bf;
   --color-lego-green: #237841;
-  --color-lego-stone: #a0a5a9;
-  --color-lego-black: #1b2a34;
-  --color-lego-cream: #f4efe6;
-  --color-lego-cream-dark: #e8dfd0;
 
-  --color-background: var(--color-lego-cream);
-  --color-foreground: var(--color-lego-black);
+  /* Dark surfaces (base palette) */
+  --color-surface: #0f1419;
+  --color-surface-2: #1b2128;
+  --color-surface-3: #262d36;
+  --color-line: #2f3742;
+
+  /* Foreground */
+  --color-fg: #ffffff;
+  --color-fg-muted: #a8b1bd;
+  --color-fg-dim: #6b7280;
+
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-fg);
 
   --font-sans: var(--font-inter);
   --font-display: var(--font-bungee);
@@ -19,7 +27,7 @@
 
 html,
 body {
-  background: var(--color-lego-cream);
-  color: var(--color-lego-black);
-  color-scheme: light;
+  background: var(--color-surface);
+  color: var(--color-fg);
+  color-scheme: dark;
 }

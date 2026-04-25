@@ -8,7 +8,7 @@ export function TileCard({
   return (
     <div
       className={cn(
-        "rounded-lg border-[3px] border-lego-black bg-white p-4",
+        "rounded-lg border border-line bg-surface-2 p-4 transition-colors hover:border-fg-dim",
         className,
       )}
       {...props}
