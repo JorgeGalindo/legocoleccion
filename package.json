@@ -10,7 +10,8 @@
     "db:generate": "drizzle-kit generate",
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
-    "sync:rebrickable": "tsx scripts/sync-rebrickable-dumps.ts"
+    "sync:rebrickable": "tsx scripts/sync-rebrickable-dumps.ts",
+    "db:wipe-copies": "tsx scripts/wipe-copies.ts"
   },
   "dependencies": {
     "@neondatabase/serverless": "^1.1.0",

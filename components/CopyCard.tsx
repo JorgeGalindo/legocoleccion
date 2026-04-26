@@ -38,16 +38,11 @@ export function CopyCard({
 
         <div className="flex flex-wrap gap-1.5">
           <ChunkyBadge variant="theme">{set.theme}</ChunkyBadge>
-          {copy.complete === "complete" && (
-            <ChunkyBadge variant="good">Completo</ChunkyBadge>
-          )}
           {copy.complete === "missing_pieces" && (
             <ChunkyBadge variant="bad">Faltan piezas</ChunkyBadge>
           )}
-          {copy.boxOpened ? (
+          {copy.boxOpened && (
             <ChunkyBadge variant="bad">Caja abierta</ChunkyBadge>
-          ) : (
-            <ChunkyBadge variant="good">Caja cerrada</ChunkyBadge>
           )}
           {copy.discontinued && (
             <ChunkyBadge variant="bad">Descatalogado</ChunkyBadge>
@@ -102,17 +97,10 @@ export function CopyRow({
         </p>
       </div>
       <div className="hidden shrink-0 gap-1 sm:flex">
-        {copy.complete === "complete" && (
-          <ChunkyBadge variant="good">OK</ChunkyBadge>
-        )}
         {copy.complete === "missing_pieces" && (
           <ChunkyBadge variant="bad">Faltan</ChunkyBadge>
         )}
-        {copy.boxOpened ? (
-          <ChunkyBadge variant="bad">Abierta</ChunkyBadge>
-        ) : (
-          <ChunkyBadge variant="good">Cerrada</ChunkyBadge>
-        )}
+        {copy.boxOpened && <ChunkyBadge variant="bad">Abierta</ChunkyBadge>}
         {copy.discontinued && <ChunkyBadge variant="bad">Descat.</ChunkyBadge>}
       </div>
     </Link>
