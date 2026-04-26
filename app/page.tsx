@@ -89,8 +89,25 @@ export default async function HomePage({
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-8">
-      <div className="mb-4 flex items-end justify-between gap-4">
+      <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <h2 className="font-display text-3xl text-fg">Tu colección</h2>
+        {rows.length > 0 && (
+          <div className="flex gap-2 text-xs uppercase tracking-wide">
+            <a
+              href="/api/export?format=json"
+              className="text-fg-muted underline hover:text-fg"
+            >
+              Exportar JSON
+            </a>
+            <span className="text-fg-dim">·</span>
+            <a
+              href="/api/export?format=csv"
+              className="text-fg-muted underline hover:text-fg"
+            >
+              Exportar CSV
+            </a>
+          </div>
+        )}
       </div>
 
       <CollectionFilters availableThemes={ownedThemes} />

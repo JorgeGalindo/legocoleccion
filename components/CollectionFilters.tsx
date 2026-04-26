@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { Select } from "@/components/Select";
+import { cn } from "@/lib/utils";
 
 const NUMBER_INPUT_CLASS =
   "rounded-md border border-line bg-surface-3 px-3 py-2 text-sm text-fg placeholder:text-fg-dim transition-colors hover:border-fg-dim focus:border-lego-yellow focus:outline-none";
@@ -16,6 +17,7 @@ export function CollectionFilters({
   const sp = useSearchParams();
 
   const [query, setQuery] = useState(sp.get("q") ?? "");
+  const [expanded, setExpanded] = useState(false);
   const debounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -50,14 +52,29 @@ export function CollectionFilters({
 
   return (
     <div className="space-y-3 rounded-lg border border-line bg-surface-2 p-4">
-      <input
-        value={query}
-        onChange={(e) => onQueryChange(e.target.value)}
-        placeholder="Buscar en mi colección por código o nombre…"
-        className="w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none"
-      />
+      <div className="flex gap-2">
+        <input
+          value={query}
+          onChange={(e) => onQueryChange(e.target.value)}
+          placeholder="Buscar en mi colección…"
+          className="flex-1 rounded-md border border-line bg-surface-3 px-3 py-2 text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none"
+        />
+        <button
+          type="button"
+          onClick={() => setExpanded((x) => !x)}
+          className="rounded-md border border-line bg-surface-3 px-3 py-2 text-xs font-bold uppercase tracking-wide text-fg-muted hover:text-fg sm:hidden"
+          aria-expanded={expanded}
+        >
+          Filtros {expanded ? "▴" : "▾"}
+        </button>
+      </div>
 
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+      <div
+        className={cn(
+          "grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5",
+          !expanded && "hidden sm:grid",
+        )}
+      >
         <Select
           value={sp.get("themes") ?? "all"}
           onChange={(e) => pushParams({ themes: e.target.value })}

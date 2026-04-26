@@ -37,12 +37,10 @@ export async function updateCopyAction(
   });
 
   revalidatePath("/");
-  revalidatePath("/debug");
   return { ok: true };
 }
 
 export async function deleteCopyAction(id: string) {
   await deleteCopy(id);
   revalidatePath("/");
-  revalidatePath("/debug");
 }

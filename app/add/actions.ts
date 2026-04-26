@@ -106,11 +106,10 @@ export async function createCopyAction(
   });
 
   revalidatePath("/");
-  revalidatePath("/debug");
 
   const action = String(formData.get("_action") ?? "save");
   if (action === "save_and_add_another") {
     return { ok: true, resetToken: Date.now() };
   }
-  redirect("/debug");
+  redirect("/");
 }
