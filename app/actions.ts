@@ -8,15 +8,6 @@ export type UpdateCopyState = {
   error?: string;
 };
 
-const COMPLETE_VALUES = ["complete", "missing_pieces", "unknown"] as const;
-type CompleteValue = (typeof COMPLETE_VALUES)[number];
-
-function parseComplete(raw: unknown): CompleteValue {
-  return COMPLETE_VALUES.includes(raw as CompleteValue)
-    ? (raw as CompleteValue)
-    : "unknown";
-}
-
 export async function updateCopyAction(
   id: string,
   _prev: UpdateCopyState,
@@ -30,7 +21,8 @@ export async function updateCopyAction(
   await updateCopy(id, {
     boxOpened: formData.get("box_opened") === "on",
     discontinued: formData.get("discontinued") === "on",
-    complete: parseComplete(formData.get("complete")),
+    complete:
+      formData.get("missing_pieces") === "on" ? "missing_pieces" : "complete",
     purchasePrice: priceRaw || null,
     purchaseDate: dateRaw || null,
     notes: notesRaw || null,

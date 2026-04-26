@@ -103,7 +103,6 @@ export function CollectionFilters({
           <option value="all">Piezas: todas</option>
           <option value="complete">Completo</option>
           <option value="missing_pieces">Faltan piezas</option>
-          <option value="unknown">Sin verificar</option>
         </Select>
 
         <Select

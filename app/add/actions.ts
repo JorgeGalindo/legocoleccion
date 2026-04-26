@@ -72,15 +72,6 @@ export type CreateCopyState = {
   resetToken?: number;
 };
 
-const COMPLETE_VALUES = ["complete", "missing_pieces", "unknown"] as const;
-type CompleteValue = (typeof COMPLETE_VALUES)[number];
-
-function parseComplete(raw: unknown): CompleteValue {
-  return COMPLETE_VALUES.includes(raw as CompleteValue)
-    ? (raw as CompleteValue)
-    : "unknown";
-}
-
 export async function createCopyAction(
   _prev: CreateCopyState,
   formData: FormData,
@@ -99,7 +90,7 @@ export async function createCopyAction(
     setCode,
     boxOpened: formData.get("box_opened") === "on",
     discontinued: formData.get("discontinued") === "on",
-    complete: parseComplete(formData.get("complete")),
+    complete: formData.get("missing_pieces") === "on" ? "missing_pieces" : "complete",
     purchasePrice: priceRaw || null,
     purchaseDate: dateRaw || null,
     notes: notesRaw || null,

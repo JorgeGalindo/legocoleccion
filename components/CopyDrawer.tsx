@@ -7,8 +7,10 @@ import {
   updateCopyAction,
   type UpdateCopyState,
 } from "@/app/actions";
-import { Select } from "@/components/Select";
 import type { LegoSet, OwnedCopy } from "@/lib/db/schema";
+
+const BAD_CHECK_ROW =
+  "flex items-center gap-2 rounded-md bg-lego-red/8 px-3 py-2 ring-1 ring-lego-red/25";
 
 const initialState: UpdateCopyState = { ok: false };
 
@@ -99,39 +101,38 @@ export function CopyDrawer({
           </div>
 
           <form action={formAction} className="space-y-5">
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="box_opened"
-                defaultChecked={copy.boxOpened}
-                className="h-4 w-4 accent-lego-yellow"
-              />
-              <span>Caja abierta</span>
-            </label>
-
-            <label className="flex items-center gap-2">
-              <input
-                type="checkbox"
-                name="discontinued"
-                defaultChecked={copy.discontinued}
-                className="h-4 w-4 accent-lego-yellow"
-              />
-              <span>Descatalogado</span>
-            </label>
-
-            <div>
-              <label
-                htmlFor="complete"
-                className="mb-1 block text-sm font-bold uppercase tracking-wide text-fg-muted"
-              >
-                Piezas
+            <fieldset className="space-y-2">
+              <legend className="mb-1 text-xs font-bold uppercase tracking-wide text-fg-muted">
+                Marca lo que no esté bien
+              </legend>
+              <label className={BAD_CHECK_ROW}>
+                <input
+                  type="checkbox"
+                  name="box_opened"
+                  defaultChecked={copy.boxOpened}
+                  className="h-4 w-4 accent-lego-red"
+                />
+                <span className="text-sm">Caja abierta</span>
               </label>
-              <Select id="complete" name="complete" defaultValue={copy.complete}>
-                <option value="unknown">Sin verificar</option>
-                <option value="complete">Completo</option>
-                <option value="missing_pieces">Faltan piezas</option>
-              </Select>
-            </div>
+              <label className={BAD_CHECK_ROW}>
+                <input
+                  type="checkbox"
+                  name="missing_pieces"
+                  defaultChecked={copy.complete === "missing_pieces"}
+                  className="h-4 w-4 accent-lego-red"
+                />
+                <span className="text-sm">Faltan piezas</span>
+              </label>
+              <label className={BAD_CHECK_ROW}>
+                <input
+                  type="checkbox"
+                  name="discontinued"
+                  defaultChecked={copy.discontinued}
+                  className="h-4 w-4 accent-lego-red"
+                />
+                <span className="text-sm">Descatalogado</span>
+              </label>
+            </fieldset>
 
             <div className="grid grid-cols-2 gap-3">
               <div>

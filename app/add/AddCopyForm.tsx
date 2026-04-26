@@ -1,13 +1,15 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
-import { Select } from "@/components/Select";
 import { SetTypeahead } from "@/components/SetTypeahead";
 import { createCopyAction, type CreateCopyState } from "./actions";
 
 const initialState: CreateCopyState = { ok: false };
 
 const currentMonth = () => new Date().toISOString().slice(0, 7);
+
+const BAD_CHECK_ROW =
+  "flex items-center gap-2 rounded-md bg-lego-red/8 px-3 py-2 ring-1 ring-lego-red/25";
 
 export function AddCopyForm() {
   const [state, formAction, pending] = useActionState(
@@ -26,42 +28,37 @@ export function AddCopyForm() {
     <form key={formKey} action={formAction} className="space-y-8">
       <SetTypeahead />
 
-      <fieldset className="space-y-3">
+      <fieldset className="space-y-2">
         <legend className="font-display text-sm uppercase tracking-wide text-fg-muted">
-          Estado
+          Marca lo que no esté bien
         </legend>
 
-        <label className="flex items-center gap-2">
+        <label className={BAD_CHECK_ROW}>
           <input
             type="checkbox"
             name="box_opened"
-            className="h-4 w-4 accent-lego-yellow"
+            className="h-4 w-4 accent-lego-red"
           />
-          <span>Caja abierta</span>
+          <span className="text-sm">Caja abierta</span>
         </label>
 
-        <label className="flex items-center gap-2">
+        <label className={BAD_CHECK_ROW}>
+          <input
+            type="checkbox"
+            name="missing_pieces"
+            className="h-4 w-4 accent-lego-red"
+          />
+          <span className="text-sm">Faltan piezas</span>
+        </label>
+
+        <label className={BAD_CHECK_ROW}>
           <input
             type="checkbox"
             name="discontinued"
-            className="h-4 w-4 accent-lego-yellow"
+            className="h-4 w-4 accent-lego-red"
           />
-          <span>Descatalogado</span>
+          <span className="text-sm">Descatalogado</span>
         </label>
-
-        <div>
-          <label
-            htmlFor="complete"
-            className="mb-1 block text-sm font-bold uppercase tracking-wide text-fg-muted"
-          >
-            Piezas
-          </label>
-          <Select id="complete" name="complete" defaultValue="unknown">
-            <option value="unknown">Sin verificar</option>
-            <option value="complete">Completo</option>
-            <option value="missing_pieces">Faltan piezas</option>
-          </Select>
-        </div>
       </fieldset>
 
       <fieldset className="space-y-3">
