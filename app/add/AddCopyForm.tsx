@@ -29,10 +29,6 @@ export function AddCopyForm() {
       <SetTypeahead />
 
       <fieldset className="space-y-2">
-        <legend className="font-display text-sm uppercase tracking-wide text-fg-muted">
-          Marca lo que no esté bien
-        </legend>
-
         <label className={BAD_CHECK_ROW}>
           <input
             type="checkbox"
@@ -62,10 +58,6 @@ export function AddCopyForm() {
       </fieldset>
 
       <fieldset className="space-y-3">
-        <legend className="font-display text-sm uppercase tracking-wide text-fg-muted">
-          Compra
-        </legend>
-
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label

@@ -102,9 +102,6 @@ export function CopyDrawer({
 
           <form action={formAction} className="space-y-5">
             <fieldset className="space-y-2">
-              <legend className="mb-1 text-xs font-bold uppercase tracking-wide text-fg-muted">
-                Marca lo que no esté bien
-              </legend>
               <label className={BAD_CHECK_ROW}>
                 <input
                   type="checkbox"
