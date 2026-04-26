@@ -7,6 +7,7 @@ import {
   updateCopyAction,
   type UpdateCopyState,
 } from "@/app/actions";
+import { Select } from "@/components/Select";
 import type { LegoSet, OwnedCopy } from "@/lib/db/schema";
 
 const initialState: UpdateCopyState = { ok: false };
@@ -125,16 +126,11 @@ export function CopyDrawer({
               >
                 Piezas
               </label>
-              <select
-                id="complete"
-                name="complete"
-                defaultValue={copy.complete}
-                className="w-full rounded border border-line bg-surface px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
-              >
+              <Select id="complete" name="complete" defaultValue={copy.complete}>
                 <option value="unknown">Sin verificar</option>
                 <option value="complete">Completo</option>
                 <option value="missing_pieces">Faltan piezas</option>
-              </select>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -143,7 +139,7 @@ export function CopyDrawer({
                   htmlFor="purchase_price"
                   className="mb-1 block text-sm text-fg-muted"
                 >
-                  Precio (€)
+                  Precio
                 </label>
                 <input
                   id="purchase_price"
@@ -153,7 +149,7 @@ export function CopyDrawer({
                   min="0"
                   inputMode="decimal"
                   defaultValue={copy.purchasePrice ?? ""}
-                  className="w-full rounded border border-line bg-surface px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
+                  className="w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
                 />
               </div>
               <div>
@@ -161,14 +157,14 @@ export function CopyDrawer({
                   htmlFor="purchase_date"
                   className="mb-1 block text-sm text-fg-muted"
                 >
-                  Fecha
+                  Mes de compra
                 </label>
                 <input
                   id="purchase_date"
-                  type="date"
+                  type="month"
                   name="purchase_date"
-                  defaultValue={copy.purchaseDate ?? ""}
-                  className="w-full rounded border border-line bg-surface px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
+                  defaultValue={copy.purchaseDate ? copy.purchaseDate.slice(0, 7) : ""}
+                  className="w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
                 />
               </div>
             </div>
@@ -231,7 +227,7 @@ export function CopyDrawer({
               <button
                 type="submit"
                 disabled={pending}
-                className="rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:opacity-90 disabled:opacity-50"
+                className="rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:bg-lego-yellow-deep disabled:opacity-50"
               >
                 {pending ? "Guardando…" : "Guardar"}
               </button>

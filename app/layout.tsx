@@ -45,9 +45,9 @@ export default function RootLayout({
               </a>
               <a
                 href="/add"
-                className="rounded bg-lego-yellow px-3 py-1.5 text-surface hover:opacity-90"
+                className="rounded bg-lego-yellow px-3 py-1.5 text-surface hover:bg-lego-yellow-deep"
               >
-                + Añadir
+                Añade +
               </a>
               <a
                 href="/debug"

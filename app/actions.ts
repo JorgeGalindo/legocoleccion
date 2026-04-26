@@ -23,7 +23,8 @@ export async function updateCopyAction(
   formData: FormData,
 ): Promise<UpdateCopyState> {
   const priceRaw = String(formData.get("purchase_price") ?? "").trim();
-  const dateRaw = String(formData.get("purchase_date") ?? "").trim();
+  const monthRaw = String(formData.get("purchase_date") ?? "").trim();
+  const dateRaw = /^\d{4}-\d{2}$/.test(monthRaw) ? `${monthRaw}-01` : "";
   const notesRaw = String(formData.get("notes") ?? "").trim();
 
   await updateCopy(id, {

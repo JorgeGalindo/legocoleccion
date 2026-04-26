@@ -1,10 +1,13 @@
 "use client";
 
 import { useActionState, useEffect, useState } from "react";
+import { Select } from "@/components/Select";
 import { SetTypeahead } from "@/components/SetTypeahead";
 import { createCopyAction, type CreateCopyState } from "./actions";
 
 const initialState: CreateCopyState = { ok: false };
+
+const currentMonth = () => new Date().toISOString().slice(0, 7);
 
 export function AddCopyForm() {
   const [state, formAction, pending] = useActionState(
@@ -53,16 +56,11 @@ export function AddCopyForm() {
           >
             Piezas
           </label>
-          <select
-            id="complete"
-            name="complete"
-            defaultValue="unknown"
-            className="w-full rounded border border-line bg-surface-2 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
-          >
+          <Select id="complete" name="complete" defaultValue="unknown">
             <option value="unknown">Sin verificar</option>
             <option value="complete">Completo</option>
             <option value="missing_pieces">Faltan piezas</option>
-          </select>
+          </Select>
         </div>
       </fieldset>
 
@@ -77,7 +75,7 @@ export function AddCopyForm() {
               htmlFor="purchase_price"
               className="mb-1 block text-sm text-fg-muted"
             >
-              Precio (€)
+              Precio
             </label>
             <input
               id="purchase_price"
@@ -86,7 +84,7 @@ export function AddCopyForm() {
               step="0.01"
               min="0"
               inputMode="decimal"
-              className="w-full rounded border border-line bg-surface-2 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
+              className="w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
             />
           </div>
           <div>
@@ -94,13 +92,14 @@ export function AddCopyForm() {
               htmlFor="purchase_date"
               className="mb-1 block text-sm text-fg-muted"
             >
-              Fecha
+              Mes de compra
             </label>
             <input
               id="purchase_date"
-              type="date"
+              type="month"
               name="purchase_date"
-              className="w-full rounded border border-line bg-surface-2 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
+              defaultValue={currentMonth()}
+              className="w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-fg focus:border-lego-yellow focus:outline-none"
             />
           </div>
         </div>
@@ -142,7 +141,7 @@ export function AddCopyForm() {
           name="_action"
           value="save"
           disabled={pending}
-          className="rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:opacity-90 disabled:opacity-50"
+          className="rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:bg-lego-yellow-deep disabled:opacity-50"
         >
           {pending ? "Guardando…" : "Guardar"}
         </button>

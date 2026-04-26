@@ -20,6 +20,14 @@ import {
 
 export type CompleteValue = "complete" | "missing_pieces" | "unknown";
 
+export type SortValue =
+  | "recent"
+  | "year_desc"
+  | "year_asc"
+  | "price_desc"
+  | "price_asc"
+  | "name_asc";
+
 export type CopiesFilter = {
   q?: string;
   themes?: string[];
@@ -28,6 +36,7 @@ export type CopiesFilter = {
   disc?: "yes" | "no";
   yearMin?: number;
   yearMax?: number;
+  sort?: SortValue;
 };
 
 // lego_sets
@@ -106,12 +115,29 @@ export async function listCopiesFiltered(f: CopiesFilter = {}) {
   if (f.yearMin !== undefined) conds.push(gte(legoSets.year, f.yearMin));
   if (f.yearMax !== undefined) conds.push(lte(legoSets.year, f.yearMax));
 
+  const orderBy = (() => {
+    switch (f.sort) {
+      case "year_desc":
+        return [desc(legoSets.year), desc(ownedCopies.createdAt)];
+      case "year_asc":
+        return [asc(legoSets.year), desc(ownedCopies.createdAt)];
+      case "price_desc":
+        return [desc(ownedCopies.purchasePrice), desc(ownedCopies.createdAt)];
+      case "price_asc":
+        return [asc(ownedCopies.purchasePrice), desc(ownedCopies.createdAt)];
+      case "name_asc":
+        return [asc(legoSets.setName), desc(ownedCopies.createdAt)];
+      default:
+        return [desc(ownedCopies.createdAt)];
+    }
+  })();
+
   return db
     .select({ copy: ownedCopies, set: legoSets })
     .from(ownedCopies)
     .innerJoin(legoSets, eq(ownedCopies.setCode, legoSets.setCode))
     .where(conds.length ? and(...conds) : undefined)
-    .orderBy(desc(ownedCopies.createdAt));
+    .orderBy(...orderBy);
 }
 
 export async function listOwnedThemes() {

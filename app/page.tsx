@@ -2,6 +2,7 @@ import Link from "next/link";
 import { CollectionFilters } from "@/components/CollectionFilters";
 import { CopyCard, CopyRow } from "@/components/CopyCard";
 import { CopyDrawer } from "@/components/CopyDrawer";
+import { SortToggle } from "@/components/SortToggle";
 import { ViewToggle } from "@/components/ViewToggle";
 import {
   getCopyById,
@@ -9,6 +10,7 @@ import {
   listOwnedThemes,
   type CompleteValue,
   type CopiesFilter,
+  type SortValue,
 } from "@/lib/db/queries";
 
 export const dynamic = "force-dynamic";
@@ -22,8 +24,24 @@ type Params = {
   year_min?: string;
   year_max?: string;
   view?: string;
+  sort?: string;
   copy?: string;
 };
+
+const VALID_SORTS: SortValue[] = [
+  "recent",
+  "year_desc",
+  "year_asc",
+  "price_desc",
+  "price_asc",
+  "name_asc",
+];
+
+function parseSort(raw: string | undefined): SortValue {
+  return raw && (VALID_SORTS as string[]).includes(raw)
+    ? (raw as SortValue)
+    : "recent";
+}
 
 function parseFilters(sp: Params): CopiesFilter {
   const themes = sp.themes ? sp.themes.split(",").filter(Boolean) : undefined;
@@ -39,6 +57,7 @@ function parseFilters(sp: Params): CopiesFilter {
     disc: sp.disc === "yes" || sp.disc === "no" ? sp.disc : undefined,
     yearMin: sp.year_min ? Number.parseInt(sp.year_min, 10) || undefined : undefined,
     yearMax: sp.year_max ? Number.parseInt(sp.year_max, 10) || undefined : undefined,
+    sort: parseSort(sp.sort),
   };
 }
 
@@ -76,11 +95,14 @@ export default async function HomePage({
 
       <CollectionFilters availableThemes={ownedThemes} />
 
-      <div className="mt-6 mb-3 flex items-center justify-between gap-3">
+      <div className="mt-6 mb-3 flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-fg-muted">
           {rows.length} {rows.length === 1 ? "copia" : "copias"}
         </p>
-        <ViewToggle current={view} />
+        <div className="flex items-center gap-2">
+          <SortToggle current={parseSort(sp.sort)} />
+          <ViewToggle current={view} />
+        </div>
       </div>
 
       {rows.length === 0 ? (

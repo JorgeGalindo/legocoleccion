@@ -2,9 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { Select } from "@/components/Select";
 
-const SELECT_CLASS =
-  "rounded border border-line bg-surface px-2 py-1.5 text-sm text-fg focus:border-lego-yellow focus:outline-none";
+const NUMBER_INPUT_CLASS =
+  "rounded-md border border-line bg-surface-3 px-3 py-2 text-sm text-fg placeholder:text-fg-dim transition-colors hover:border-fg-dim focus:border-lego-yellow focus:outline-none";
 
 export function CollectionFilters({
   availableThemes,
@@ -53,14 +54,13 @@ export function CollectionFilters({
         value={query}
         onChange={(e) => onQueryChange(e.target.value)}
         placeholder="Buscar en mi colección por código o nombre…"
-        className="w-full rounded border border-line bg-surface px-3 py-2 text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none"
+        className="w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none"
       />
 
       <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
-        <select
+        <Select
           value={sp.get("themes") ?? "all"}
           onChange={(e) => pushParams({ themes: e.target.value })}
-          className={SELECT_CLASS}
         >
           <option value="all">Todos los temas</option>
           {availableThemes.map((t) => (
@@ -68,38 +68,35 @@ export function CollectionFilters({
               {t}
             </option>
           ))}
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={sp.get("box") ?? "all"}
           onChange={(e) => pushParams({ box: e.target.value })}
-          className={SELECT_CLASS}
         >
           <option value="all">Caja: todas</option>
           <option value="open">Abierta</option>
           <option value="closed">Cerrada</option>
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={sp.get("pieces") ?? "all"}
           onChange={(e) => pushParams({ pieces: e.target.value })}
-          className={SELECT_CLASS}
         >
           <option value="all">Piezas: todas</option>
           <option value="complete">Completo</option>
           <option value="missing_pieces">Faltan piezas</option>
           <option value="unknown">Sin verificar</option>
-        </select>
+        </Select>
 
-        <select
+        <Select
           value={sp.get("disc") ?? "all"}
           onChange={(e) => pushParams({ disc: e.target.value })}
-          className={SELECT_CLASS}
         >
           <option value="all">Catálogo: todos</option>
           <option value="yes">Descatalogado</option>
           <option value="no">Vigente</option>
-        </select>
+        </Select>
 
         <div className="flex gap-1">
           <input
@@ -109,7 +106,7 @@ export function CollectionFilters({
             max="2099"
             value={sp.get("year_min") ?? ""}
             onChange={(e) => pushParams({ year_min: e.target.value })}
-            className={`${SELECT_CLASS} w-1/2`}
+            className={`${NUMBER_INPUT_CLASS} w-1/2`}
           />
           <input
             type="number"
@@ -118,7 +115,7 @@ export function CollectionFilters({
             max="2099"
             value={sp.get("year_max") ?? ""}
             onChange={(e) => pushParams({ year_max: e.target.value })}
-            className={`${SELECT_CLASS} w-1/2`}
+            className={`${NUMBER_INPUT_CLASS} w-1/2`}
           />
         </div>
       </div>
