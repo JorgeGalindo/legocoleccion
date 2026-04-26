@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Bungee, Inter } from "next/font/google";
+import { AsciiBrick } from "@/components/AsciiBrick";
 import { StudPattern } from "@/components/StudPattern";
 import "./globals.css";
 
@@ -31,11 +32,14 @@ export default function RootLayout({
     >
       <body className="flex min-h-full flex-col font-sans">
         <header className="border-b border-line bg-surface">
-          <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-4">
-            <h1 className="font-display text-2xl tracking-wider">
-              <span className="text-lego-yellow">lego</span>
-              <span className="text-fg">coleccion</span>
-            </h1>
+          <div className="mx-auto flex max-w-5xl items-center justify-between gap-4 px-6 py-3">
+            <div className="flex items-center gap-3">
+              <AsciiBrick size="sm" />
+              <h1 className="font-display text-2xl tracking-wider">
+                <span className="text-lego-yellow">lego</span>
+                <span className="text-fg">coleccion</span>
+              </h1>
+            </div>
             <nav className="flex gap-2 text-sm font-bold uppercase tracking-wide">
               <a
                 href="/"

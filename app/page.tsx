@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { AsciiBrick } from "@/components/AsciiBrick";
 import { CollectionFilters } from "@/components/CollectionFilters";
 import { CopyCard, CopyRow } from "@/components/CopyCard";
 import { CopyDrawer } from "@/components/CopyDrawer";
@@ -155,20 +156,23 @@ export default async function HomePage({
 function EmptyState({ hasFilters }: { hasFilters: boolean }) {
   return (
     <div className="rounded-lg border border-line bg-surface-2 p-10 text-center">
-      <p className="font-display text-xl text-fg">
-        {hasFilters ? "Nada con esos filtros" : "Aún no hay copias"}
+      <div className="flex justify-center">
+        <AsciiBrick size="lg" />
+      </div>
+      <p className="mt-6 font-display text-xl text-fg">
+        {hasFilters ? "Nada con esos filtros" : "La estantería está vacía"}
       </p>
       <p className="mt-2 text-sm text-fg-muted">
         {hasFilters
           ? "Prueba a aflojar algún filtro o limpiarlos."
-          : "Empieza con el botón de añadir."}
+          : "Empieza añadiendo tu primer set."}
       </p>
       {!hasFilters && (
         <Link
           href="/add"
-          className="mt-4 inline-block rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:opacity-90"
+          className="mt-4 inline-block rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:bg-lego-yellow-deep"
         >
-          + Añadir primera copia
+          Añade +
         </Link>
       )}
     </div>
