@@ -1,48 +1,137 @@
-import { ChunkyBadge } from "@/components/ChunkyBadge";
-import { TileCard } from "@/components/TileCard";
+import Link from "next/link";
+import { CollectionFilters } from "@/components/CollectionFilters";
+import { CopyCard, CopyRow } from "@/components/CopyCard";
+import { CopyDrawer } from "@/components/CopyDrawer";
+import { ViewToggle } from "@/components/ViewToggle";
+import {
+  getCopyById,
+  listCopiesFiltered,
+  listOwnedThemes,
+  type CompleteValue,
+  type CopiesFilter,
+} from "@/lib/db/queries";
 
-export default function HomePage() {
+export const dynamic = "force-dynamic";
+
+type Params = {
+  q?: string;
+  themes?: string;
+  box?: string;
+  pieces?: string;
+  disc?: string;
+  year_min?: string;
+  year_max?: string;
+  view?: string;
+  copy?: string;
+};
+
+function parseFilters(sp: Params): CopiesFilter {
+  const themes = sp.themes ? sp.themes.split(",").filter(Boolean) : undefined;
+  const validComplete: CompleteValue[] = ["complete", "missing_pieces", "unknown"];
+  return {
+    q: sp.q,
+    themes,
+    box: sp.box === "open" || sp.box === "closed" ? sp.box : undefined,
+    pieces:
+      sp.pieces && validComplete.includes(sp.pieces as CompleteValue)
+        ? (sp.pieces as CompleteValue)
+        : undefined,
+    disc: sp.disc === "yes" || sp.disc === "no" ? sp.disc : undefined,
+    yearMin: sp.year_min ? Number.parseInt(sp.year_min, 10) || undefined : undefined,
+    yearMax: sp.year_max ? Number.parseInt(sp.year_max, 10) || undefined : undefined,
+  };
+}
+
+function buildBaseSearch(sp: Params): string {
+  const params = new URLSearchParams();
+  for (const [k, v] of Object.entries(sp)) {
+    if (k === "copy") continue;
+    if (typeof v === "string" && v) params.set(k, v);
+  }
+  return params.toString();
+}
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<Params>;
+}) {
+  const sp = await searchParams;
+  const filters = parseFilters(sp);
+  const view = sp.view === "list" ? "list" : "grid";
+
+  const [rows, ownedThemes, drawerData] = await Promise.all([
+    listCopiesFiltered(filters),
+    listOwnedThemes(),
+    sp.copy ? getCopyById(sp.copy) : Promise.resolve(null),
+  ]);
+
+  const baseSearch = buildBaseSearch(sp);
+
   return (
-    <div className="mx-auto max-w-5xl px-6 py-12">
-      <h2 className="mb-2 font-display text-4xl text-fg">Tu colección</h2>
-      <p className="mb-8 text-fg-muted">
-        Aquí vivirá la vista de la colección. De momento, una muestra del estilo.
-      </p>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <TileCard>
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            <ChunkyBadge variant="yellow">Icons</ChunkyBadge>
-            <ChunkyBadge variant="green">Completo</ChunkyBadge>
-          </div>
-          <h3 className="font-display text-lg leading-tight text-fg">
-            Galaxy Explorer
-          </h3>
-          <p className="text-sm text-fg-muted">10497 · 2022 · 1254 piezas</p>
-        </TileCard>
-
-        <TileCard>
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            <ChunkyBadge variant="red">Descatalogado</ChunkyBadge>
-            <ChunkyBadge variant="neutral">Caja abierta</ChunkyBadge>
-          </div>
-          <h3 className="font-display text-lg leading-tight text-fg">
-            Café Corner
-          </h3>
-          <p className="text-sm text-fg-muted">10182 · 2007 · 2056 piezas</p>
-        </TileCard>
-
-        <TileCard>
-          <div className="mb-3 flex flex-wrap gap-1.5">
-            <ChunkyBadge variant="blue">Star Wars</ChunkyBadge>
-            <ChunkyBadge variant="neutral">Sin verificar</ChunkyBadge>
-          </div>
-          <h3 className="font-display text-lg leading-tight text-fg">
-            Imperial Star Destroyer
-          </h3>
-          <p className="text-sm text-fg-muted">75252 · 2019 · 4784 piezas</p>
-        </TileCard>
+    <div className="mx-auto max-w-6xl px-6 py-8">
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <h2 className="font-display text-3xl text-fg">Tu colección</h2>
       </div>
+
+      <CollectionFilters availableThemes={ownedThemes} />
+
+      <div className="mt-6 mb-3 flex items-center justify-between gap-3">
+        <p className="text-sm text-fg-muted">
+          {rows.length} {rows.length === 1 ? "copia" : "copias"}
+        </p>
+        <ViewToggle current={view} />
+      </div>
+
+      {rows.length === 0 ? (
+        <EmptyState hasFilters={baseSearch.length > 0} />
+      ) : view === "list" ? (
+        <ul className="divide-y divide-line overflow-hidden rounded-lg border border-line bg-surface-2">
+          {rows.map(({ copy, set }) => (
+            <li key={copy.id}>
+              <CopyRow copy={copy} set={set} baseSearch={baseSearch} />
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map(({ copy, set }) => (
+            <CopyCard
+              key={copy.id}
+              copy={copy}
+              set={set}
+              baseSearch={baseSearch}
+            />
+          ))}
+        </div>
+      )}
+
+      {drawerData && (
+        <CopyDrawer copy={drawerData.copy} set={drawerData.set} />
+      )}
+    </div>
+  );
+}
+
+function EmptyState({ hasFilters }: { hasFilters: boolean }) {
+  return (
+    <div className="rounded-lg border border-line bg-surface-2 p-10 text-center">
+      <p className="font-display text-xl text-fg">
+        {hasFilters ? "Nada con esos filtros" : "Aún no hay copias"}
+      </p>
+      <p className="mt-2 text-sm text-fg-muted">
+        {hasFilters
+          ? "Prueba a aflojar algún filtro o limpiarlos."
+          : "Empieza con el botón de añadir."}
+      </p>
+      {!hasFilters && (
+        <Link
+          href="/add"
+          className="mt-4 inline-block rounded bg-lego-yellow px-4 py-2 font-bold uppercase tracking-wide text-surface hover:opacity-90"
+        >
+          + Añadir primera copia
+        </Link>
+      )}
     </div>
   );
 }

@@ -1,4 +1,15 @@
-import { desc, eq, ilike, or } from "drizzle-orm";
+import {
+  and,
+  asc,
+  desc,
+  eq,
+  gte,
+  ilike,
+  inArray,
+  lte,
+  or,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "./index";
 import {
   legoSets,
@@ -6,6 +17,18 @@ import {
   type NewLegoSet,
   type NewOwnedCopy,
 } from "./schema";
+
+export type CompleteValue = "complete" | "missing_pieces" | "unknown";
+
+export type CopiesFilter = {
+  q?: string;
+  themes?: string[];
+  box?: "open" | "closed";
+  pieces?: CompleteValue;
+  disc?: "yes" | "no";
+  yearMin?: number;
+  yearMax?: number;
+};
 
 // lego_sets
 
@@ -59,6 +82,55 @@ export async function listCopies() {
     })
     .from(ownedCopies)
     .leftJoin(legoSets, eq(ownedCopies.setCode, legoSets.setCode));
+}
+
+export async function listCopiesFiltered(f: CopiesFilter = {}) {
+  const conds: SQL[] = [];
+
+  if (f.q?.trim()) {
+    const q = f.q.trim();
+    const expr = or(
+      ilike(legoSets.setName, `%${q}%`),
+      ilike(legoSets.setCode, `${q}%`),
+    );
+    if (expr) conds.push(expr);
+  }
+  if (f.themes?.length) {
+    conds.push(inArray(legoSets.theme, f.themes));
+  }
+  if (f.box === "open") conds.push(eq(ownedCopies.boxOpened, true));
+  if (f.box === "closed") conds.push(eq(ownedCopies.boxOpened, false));
+  if (f.pieces) conds.push(eq(ownedCopies.complete, f.pieces));
+  if (f.disc === "yes") conds.push(eq(ownedCopies.discontinued, true));
+  if (f.disc === "no") conds.push(eq(ownedCopies.discontinued, false));
+  if (f.yearMin !== undefined) conds.push(gte(legoSets.year, f.yearMin));
+  if (f.yearMax !== undefined) conds.push(lte(legoSets.year, f.yearMax));
+
+  return db
+    .select({ copy: ownedCopies, set: legoSets })
+    .from(ownedCopies)
+    .innerJoin(legoSets, eq(ownedCopies.setCode, legoSets.setCode))
+    .where(conds.length ? and(...conds) : undefined)
+    .orderBy(desc(ownedCopies.createdAt));
+}
+
+export async function listOwnedThemes() {
+  const rows = await db
+    .selectDistinct({ theme: legoSets.theme })
+    .from(ownedCopies)
+    .innerJoin(legoSets, eq(ownedCopies.setCode, legoSets.setCode))
+    .orderBy(asc(legoSets.theme));
+  return rows.map((r) => r.theme);
+}
+
+export async function getCopyById(id: string) {
+  const [row] = await db
+    .select({ copy: ownedCopies, set: legoSets })
+    .from(ownedCopies)
+    .innerJoin(legoSets, eq(ownedCopies.setCode, legoSets.setCode))
+    .where(eq(ownedCopies.id, id))
+    .limit(1);
+  return row ?? null;
 }
 
 export async function createCopy(input: NewOwnedCopy) {
