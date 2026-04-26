@@ -1,12 +1,17 @@
 import { cn } from "@/lib/utils";
 
-type Variant = "red" | "yellow" | "blue" | "green" | "neutral";
+type Variant =
+  | "theme" // chunky yellow — categoría/tema
+  | "good" // soft green — estado positivo
+  | "bad" // soft red — estado negativo
+  | "info" // chunky blue — informativo
+  | "neutral"; // suave neutro
 
 const variantClasses: Record<Variant, string> = {
-  red: "bg-lego-red text-white",
-  yellow: "bg-lego-yellow text-surface",
-  blue: "bg-lego-blue text-white",
-  green: "bg-lego-green text-white",
+  theme: "bg-lego-yellow text-surface",
+  good: "bg-lego-green/15 text-lego-green",
+  bad: "bg-lego-red/15 text-lego-red",
+  info: "bg-lego-blue text-white",
   neutral: "bg-surface-3 text-fg-muted",
 };
 

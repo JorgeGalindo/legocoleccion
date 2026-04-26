@@ -37,20 +37,20 @@ export function CopyCard({
         )}
 
         <div className="flex flex-wrap gap-1.5">
-          <ChunkyBadge variant="yellow">{set.theme}</ChunkyBadge>
+          <ChunkyBadge variant="theme">{set.theme}</ChunkyBadge>
           {copy.complete === "complete" && (
-            <ChunkyBadge variant="green">Completo</ChunkyBadge>
+            <ChunkyBadge variant="good">Completo</ChunkyBadge>
           )}
           {copy.complete === "missing_pieces" && (
-            <ChunkyBadge variant="red">Faltan piezas</ChunkyBadge>
+            <ChunkyBadge variant="bad">Faltan piezas</ChunkyBadge>
           )}
           {copy.boxOpened ? (
-            <ChunkyBadge variant="neutral">Caja abierta</ChunkyBadge>
+            <ChunkyBadge variant="bad">Caja abierta</ChunkyBadge>
           ) : (
-            <ChunkyBadge variant="blue">Caja cerrada</ChunkyBadge>
+            <ChunkyBadge variant="good">Caja cerrada</ChunkyBadge>
           )}
           {copy.discontinued && (
-            <ChunkyBadge variant="red">Descatalogado</ChunkyBadge>
+            <ChunkyBadge variant="bad">Descatalogado</ChunkyBadge>
           )}
         </div>
 
@@ -103,17 +103,17 @@ export function CopyRow({
       </div>
       <div className="hidden shrink-0 gap-1 sm:flex">
         {copy.complete === "complete" && (
-          <ChunkyBadge variant="green">OK</ChunkyBadge>
+          <ChunkyBadge variant="good">OK</ChunkyBadge>
         )}
         {copy.complete === "missing_pieces" && (
-          <ChunkyBadge variant="red">Faltan</ChunkyBadge>
+          <ChunkyBadge variant="bad">Faltan</ChunkyBadge>
         )}
         {copy.boxOpened ? (
-          <ChunkyBadge variant="neutral">Abierta</ChunkyBadge>
+          <ChunkyBadge variant="bad">Abierta</ChunkyBadge>
         ) : (
-          <ChunkyBadge variant="blue">Cerrada</ChunkyBadge>
+          <ChunkyBadge variant="good">Cerrada</ChunkyBadge>
         )}
-        {copy.discontinued && <ChunkyBadge variant="red">Descat.</ChunkyBadge>}
+        {copy.discontinued && <ChunkyBadge variant="bad">Descat.</ChunkyBadge>}
       </div>
     </Link>
   );

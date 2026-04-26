@@ -1,12 +1,12 @@
 @import "tailwindcss";
 
 @theme {
-  /* Brick accents */
-  --color-lego-red: #d01012;
-  --color-lego-yellow: #f5b82e;
-  --color-lego-yellow-deep: #d6991a;
-  --color-lego-blue: #0055bf;
-  --color-lego-green: #237841;
+  /* Brick accents (EsadeEcPol palette + custom warm yellow) */
+  --color-lego-red: #e05656;
+  --color-lego-yellow: #eba605;
+  --color-lego-yellow-deep: #c99304;
+  --color-lego-blue: #225e9c;
+  --color-lego-green: #00a47d;
 
   /* Dark surfaces (base palette) */
   --color-surface: #0f1419;
