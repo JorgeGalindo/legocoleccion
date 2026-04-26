@@ -8,10 +8,10 @@ type Variant =
   | "neutral"; // suave neutro
 
 const variantClasses: Record<Variant, string> = {
-  theme: "bg-lego-yellow text-surface",
+  theme: "bg-lego-yellow/15 text-lego-yellow",
   good: "bg-lego-green/15 text-lego-green",
   bad: "bg-lego-red/15 text-lego-red",
-  info: "bg-lego-blue text-white",
+  info: "bg-lego-blue/15 text-lego-blue",
   neutral: "bg-surface-3 text-fg-muted",
 };
 
