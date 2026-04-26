@@ -2,11 +2,68 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { createCopy, searchSets } from "@/lib/db/queries";
+import { createCopy, searchSets, upsertSet } from "@/lib/db/queries";
+import {
+  resolveThemePath,
+  searchSetsRebrickable,
+} from "@/lib/rebrickable-api";
 import type { LegoSet } from "@/lib/db/schema";
 
 export async function searchSetsAction(query: string): Promise<LegoSet[]> {
-  return searchSets(query, 10);
+  const local = await searchSets(query, 10);
+  if (local.length > 0) return local;
+
+  // Fallback: nada en local → preguntar a Rebrickable
+  try {
+    const remote = await searchSetsRebrickable(query);
+    if (!remote.length) return [];
+
+    const upserted: LegoSet[] = [];
+    for (const r of remote) {
+      const themeName = await resolveThemePath(r.theme_id).catch(
+        () => `Theme #${r.theme_id}`,
+      );
+      const set = await upsertSet({
+        setCode: r.set_num,
+        setName: r.name,
+        theme: themeName,
+        year: r.year,
+        pieces: r.num_parts,
+        imageUrl: r.set_img_url,
+      });
+      upserted.push(set);
+    }
+    return upserted;
+  } catch (e) {
+    console.error("Rebrickable API fallback failed:", e);
+    return [];
+  }
+}
+
+export type ManualSetInput = {
+  setCode: string;
+  setName: string;
+  theme: string;
+  year: number | null;
+  pieces: number | null;
+};
+
+export async function createManualSetAction(
+  input: ManualSetInput,
+): Promise<LegoSet> {
+  const code = input.setCode.trim();
+  const name = input.setName.trim();
+  if (!code) throw new Error("El código es obligatorio.");
+  if (!name) throw new Error("El nombre es obligatorio.");
+
+  return upsertSet({
+    setCode: code,
+    setName: name,
+    theme: input.theme.trim() || "Sin clasificar",
+    year: input.year,
+    pieces: input.pieces,
+    imageUrl: null,
+  });
 }
 
 export type CreateCopyState = {

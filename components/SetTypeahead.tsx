@@ -1,7 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { searchSetsAction } from "@/app/add/actions";
+import { useEffect, useRef, useState, useTransition } from "react";
+import {
+  createManualSetAction,
+  searchSetsAction,
+} from "@/app/add/actions";
 import type { LegoSet } from "@/lib/db/schema";
 
 export function SetTypeahead() {
@@ -10,11 +13,14 @@ export function SetTypeahead() {
   const [selected, setSelected] = useState<LegoSet | null>(null);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [searched, setSearched] = useState(false);
+  const [manualMode, setManualMode] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (selected || !query.trim()) {
       setResults([]);
+      setSearched(false);
       return;
     }
     let cancelled = false;
@@ -24,12 +30,13 @@ export function SetTypeahead() {
         const r = await searchSetsAction(query);
         if (!cancelled) {
           setResults(r);
+          setSearched(true);
           setOpen(true);
         }
       } finally {
         if (!cancelled) setLoading(false);
       }
-    }, 200);
+    }, 250);
     return () => {
       cancelled = true;
       clearTimeout(t);
@@ -83,6 +90,8 @@ export function SetTypeahead() {
               setSelected(null);
               setQuery("");
               setResults([]);
+              setSearched(false);
+              setManualMode(false);
             }}
             className="shrink-0 text-xs uppercase text-fg-muted underline hover:text-fg"
           >
@@ -101,12 +110,16 @@ export function SetTypeahead() {
       <input
         type="text"
         value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        onFocus={() => results.length > 0 && setOpen(true)}
+        onChange={(e) => {
+          setQuery(e.target.value);
+          setManualMode(false);
+        }}
+        onFocus={() => (results.length > 0 || searched) && setOpen(true)}
         placeholder="Busca por código o nombre…"
         autoComplete="off"
-        className="mt-1 w-full rounded border border-line bg-surface-2 px-3 py-2 text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none"
+        className="mt-1 w-full rounded border border-line bg-surface-3 px-3 py-2 text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none"
       />
+
       {open && (loading || results.length > 0) && (
         <ul className="absolute z-10 mt-1 max-h-72 w-full overflow-auto rounded border border-line bg-surface-2 shadow-lg">
           {loading && (
@@ -150,6 +163,161 @@ export function SetTypeahead() {
             ))}
         </ul>
       )}
+
+      {open &&
+        !loading &&
+        searched &&
+        results.length === 0 &&
+        !manualMode && (
+          <div className="absolute z-10 mt-1 w-full rounded border border-line bg-surface-2 p-3 shadow-lg">
+            <p className="text-sm text-fg-muted">
+              Sin resultados para “{query}”. Probé también en Rebrickable.
+            </p>
+            <button
+              type="button"
+              onClick={() => setManualMode(true)}
+              className="mt-2 text-xs font-bold uppercase tracking-wide text-lego-yellow hover:text-lego-yellow-deep"
+            >
+              Añadirlo a mano +
+            </button>
+          </div>
+        )}
+
+      {manualMode && (
+        <ManualSetForm
+          initialCode={query}
+          onCreated={(set) => {
+            setSelected(set);
+            setManualMode(false);
+            setOpen(false);
+          }}
+          onCancel={() => setManualMode(false)}
+        />
+      )}
     </div>
+  );
+}
+
+function ManualSetForm({
+  initialCode,
+  onCreated,
+  onCancel,
+}: {
+  initialCode: string;
+  onCreated: (set: LegoSet) => void;
+  onCancel: () => void;
+}) {
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
+  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    const fd = new FormData(e.currentTarget);
+    const yearRaw = String(fd.get("year") ?? "").trim();
+    const piecesRaw = String(fd.get("pieces") ?? "").trim();
+
+    startTransition(async () => {
+      try {
+        const set = await createManualSetAction({
+          setCode: String(fd.get("code") ?? ""),
+          setName: String(fd.get("name") ?? ""),
+          theme: String(fd.get("theme") ?? ""),
+          year: yearRaw ? Number.parseInt(yearRaw, 10) || null : null,
+          pieces: piecesRaw ? Number.parseInt(piecesRaw, 10) || null : null,
+        });
+        onCreated(set);
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "Error desconocido");
+      }
+    });
+  }
+
+  const inputClass =
+    "w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-sm text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none";
+
+  return (
+    <form
+      onSubmit={onSubmit}
+      className="mt-2 space-y-3 rounded-md border border-line bg-surface-2 p-4"
+    >
+      <p className="text-xs uppercase tracking-wide text-fg-muted">
+        Añadir set a mano
+      </p>
+
+      <div>
+        <label className="mb-1 block text-xs text-fg-muted">Código *</label>
+        <input
+          name="code"
+          defaultValue={initialCode}
+          required
+          className={inputClass}
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs text-fg-muted">Nombre *</label>
+        <input
+          name="name"
+          required
+          placeholder="Mi MOC, set promo, etc."
+          className={inputClass}
+        />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-xs text-fg-muted">Tema</label>
+        <input
+          name="theme"
+          placeholder="Sin clasificar"
+          className={inputClass}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-2">
+        <div>
+          <label className="mb-1 block text-xs text-fg-muted">Año</label>
+          <input
+            name="year"
+            type="number"
+            min="1949"
+            max="2099"
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className="mb-1 block text-xs text-fg-muted">Piezas</label>
+          <input
+            name="pieces"
+            type="number"
+            min="0"
+            className={inputClass}
+          />
+        </div>
+      </div>
+
+      {error && (
+        <p className="rounded border border-lego-red/40 bg-lego-red/10 px-3 py-2 text-sm text-lego-red">
+          {error}
+        </p>
+      )}
+
+      <div className="flex gap-2">
+        <button
+          type="submit"
+          disabled={pending}
+          className="rounded bg-lego-yellow px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-surface hover:bg-lego-yellow-deep disabled:opacity-50"
+        >
+          {pending ? "Guardando…" : "Crear y usar"}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="text-xs uppercase tracking-wide text-fg-muted underline hover:text-fg"
+        >
+          Cancelar
+        </button>
+      </div>
+    </form>
   );
 }
