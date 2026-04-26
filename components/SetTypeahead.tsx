@@ -209,22 +209,35 @@ function ManualSetForm({
 }) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
+  const [code, setCode] = useState(initialCode);
+  const [name, setName] = useState("");
+  const [theme, setTheme] = useState("");
+  const [year, setYear] = useState("");
+  const [pieces, setPieces] = useState("");
 
-  function onSubmit(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
+  function submit() {
     setError(null);
-    const fd = new FormData(e.currentTarget);
-    const yearRaw = String(fd.get("year") ?? "").trim();
-    const piecesRaw = String(fd.get("pieces") ?? "").trim();
+    const codeT = code.trim();
+    const nameT = name.trim();
+    if (!codeT) {
+      setError("El código es obligatorio.");
+      return;
+    }
+    if (!nameT) {
+      setError("El nombre es obligatorio.");
+      return;
+    }
+    const yearN = year.trim() ? Number.parseInt(year.trim(), 10) : NaN;
+    const piecesN = pieces.trim() ? Number.parseInt(pieces.trim(), 10) : NaN;
 
     startTransition(async () => {
       try {
         const set = await createManualSetAction({
-          setCode: String(fd.get("code") ?? ""),
-          setName: String(fd.get("name") ?? ""),
-          theme: String(fd.get("theme") ?? ""),
-          year: yearRaw ? Number.parseInt(yearRaw, 10) || null : null,
-          pieces: piecesRaw ? Number.parseInt(piecesRaw, 10) || null : null,
+          setCode: codeT,
+          setName: nameT,
+          theme: theme.trim(),
+          year: Number.isFinite(yearN) ? yearN : null,
+          pieces: Number.isFinite(piecesN) ? piecesN : null,
         });
         onCreated(set);
       } catch (e) {
@@ -233,14 +246,18 @@ function ManualSetForm({
     });
   }
 
+  function onKey(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      submit();
+    }
+  }
+
   const inputClass =
     "w-full rounded-md border border-line bg-surface-3 px-3 py-2 text-sm text-fg placeholder:text-fg-dim focus:border-lego-yellow focus:outline-none";
 
   return (
-    <form
-      onSubmit={onSubmit}
-      className="mt-2 space-y-3 rounded-md border border-line bg-surface-2 p-4"
-    >
+    <div className="mt-2 space-y-3 rounded-md border border-line bg-surface-2 p-4">
       <p className="text-xs uppercase tracking-wide text-fg-muted">
         Añadir set a mano
       </p>
@@ -248,9 +265,9 @@ function ManualSetForm({
       <div>
         <label className="mb-1 block text-xs text-fg-muted">Código *</label>
         <input
-          name="code"
-          defaultValue={initialCode}
-          required
+          value={code}
+          onChange={(e) => setCode(e.target.value)}
+          onKeyDown={onKey}
           className={inputClass}
         />
       </div>
@@ -258,8 +275,9 @@ function ManualSetForm({
       <div>
         <label className="mb-1 block text-xs text-fg-muted">Nombre *</label>
         <input
-          name="name"
-          required
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onKeyDown={onKey}
           placeholder="Mi MOC, set promo, etc."
           className={inputClass}
         />
@@ -268,7 +286,9 @@ function ManualSetForm({
       <div>
         <label className="mb-1 block text-xs text-fg-muted">Tema</label>
         <input
-          name="theme"
+          value={theme}
+          onChange={(e) => setTheme(e.target.value)}
+          onKeyDown={onKey}
           placeholder="Sin clasificar"
           className={inputClass}
         />
@@ -278,19 +298,23 @@ function ManualSetForm({
         <div>
           <label className="mb-1 block text-xs text-fg-muted">Año</label>
           <input
-            name="year"
             type="number"
             min="1949"
             max="2099"
+            value={year}
+            onChange={(e) => setYear(e.target.value)}
+            onKeyDown={onKey}
             className={inputClass}
           />
         </div>
         <div>
           <label className="mb-1 block text-xs text-fg-muted">Piezas</label>
           <input
-            name="pieces"
             type="number"
             min="0"
+            value={pieces}
+            onChange={(e) => setPieces(e.target.value)}
+            onKeyDown={onKey}
             className={inputClass}
           />
         </div>
@@ -304,7 +328,8 @@ function ManualSetForm({
 
       <div className="flex gap-2">
         <button
-          type="submit"
+          type="button"
+          onClick={submit}
           disabled={pending}
           className="rounded bg-lego-yellow px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-surface hover:bg-lego-yellow-deep disabled:opacity-50"
         >
@@ -318,6 +343,6 @@ function ManualSetForm({
           Cancelar
         </button>
       </div>
-    </form>
+    </div>
   );
 }
